@@ -6,11 +6,10 @@ const sqlite3 = require('sqlite3').verbose();
 // Documentación en https://expressjs.com/en/starter/hello-world.html
 const app = express();
 
-// Creamos un parser de tipo application/json
-// Documentación en https://expressjs.com/en/resources/middleware/body-parser.html
+// Middleware para parsear JSON
 app.use(bodyParser.json());
 
-// Abre o crea la base de datos de SQLite
+// Abrir o crear la base de datos de SQLite
 const db = new sqlite3.Database('./base.sqlite3', (err) => {
   if (err) {
     return console.error('Error al abrir BD:', err.message);
@@ -57,6 +56,21 @@ app.post('/agrega_todo', (req, res) => {
       todo,
       created_at: timestamp
     });
+  });
+});
+
+/**
+ * GET /todos
+ * Devuelve la lista completa de todos los registros en formato JSON
+ */
+app.get('/todos', (req, res) => {
+  const sql = 'SELECT * FROM todos';
+  db.all(sql, [], (err, rows) => {
+    if (err) {
+      console.error('Error al leer todos:', err.message);
+      return res.status(500).json({ error: 'Error al obtener la lista de todos.' });
+    }
+    res.status(200).json(rows);
   });
 });
 
